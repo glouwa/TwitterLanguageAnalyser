@@ -26,7 +26,8 @@ class MyStreamListener(tweepy.StreamListener):
             loc = tweet.coordinates
         if tweet.user.location:
             loc = tweet.user.location
-        if loc:       
+        if loc:
+            """       
             try:     
                 geoloc = gn.geocode(loc)
                 if geoloc:
@@ -39,26 +40,40 @@ class MyStreamListener(tweepy.StreamListener):
                     tweet._json['geo'] = geoloc.address
                     tweet._json['coordinates'] = [geoloc.longitude, geoloc.latitude]
 
-                    tweets.append(tweet._json)
-                    if len(tweets) % 10 == 0:
-                        with open('stream-raw-with-geo.json', 'w') as outfile:
-                            json.dump(tweets, outfile)
-                            print(len(tweets))
+                    
                     #print(json.dumps(tweet._json, indent=4))
                     #print("[{},{}],".format(geoloc.longitude, geoloc.latitude))
                     #print(text)
             except (exc.GeocoderTimedOut, exceptions.ReadTimeoutError, exceptions.ProtocolError):
                 print("IOError")
+            """
+            try:
+                tweets.append(tweet._json)
+                if len(tweets) % 1000 == 0:
+                    with open('stream-raw-with-geo2.json', 'w') as outfile:
+                        json.dump(tweets, outfile)
+                        print(len(tweets))
+            except (exc.GeocoderTimedOut, exceptions.ReadTimeoutError, exceptions.ProtocolError):
+                print("IOError")
     
         
     def on_error(self, status_code):
+        return True
+        """
         if status_code == 420:
             #returning False in on_data disconnects the stream
             return False
+        """
         
+
 myStreamListener = MyStreamListener()
-myStream = tweepy.Stream(auth = api.auth, listener=myStreamListener)
-myStream.filter(track=['worldcup', 'ЧМ2012', 'diemannschaft'], async=True)
+
+while True:
+    try:
+        myStream = tweepy.Stream(auth = api.auth, listener=myStreamListener)
+        myStream.filter(track=['worldcup', 'ЧМ2018', 'diemannschaft', 'WM2018', 'worldcup2018', 'WM18'])
+    except (exc.GeocoderTimedOut, exceptions.ReadTimeoutError, exceptions.ProtocolError):
+        print("eror")
 
 print("start listening")
 
