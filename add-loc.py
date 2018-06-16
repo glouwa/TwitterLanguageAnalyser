@@ -48,18 +48,23 @@ with open('stream-raw-with-geo2.json', 'r') as infile:
 
 print(len(tweets_in))
 langs = ['ar', 'nl', 'en', 'fr', 'de', 'it', 'ja', 'pt', 'ru', 'es']
+lastcachelen = len(cache)
 
-for idx, tweet in enumerate(tweets_in):
-    if idx % 5 == 0:        
-        if  str(tweet['lang']) in langs:
-            if idx % 100 == 0:
-                print(idx, len(cache), len(tweets_out))
-            processTweet(tweet)
+for idx, tweet in enumerate(tweets_in):    
+    if  str(tweet['lang']) in langs:
+        if idx % 100 == 0:
+            print(idx, len(cache), len(tweets_out))
+        processTweet(tweet)
 
-            if idx % 100 == 0:
-                with open('cache-loc.json', 'w') as outfile:
-                    json.dump(cache, outfile)
+        if len(cache) > lastcachelen + 100:
+            with open('cache-loc.json', 'w') as outfile:
+                json.dump(cache, outfile)
+                lastcachelen = len(cache)
+                print("saving cache")
 
-            if idx % 1000 == 0:        
-                with open('array-loc.json', 'w') as outfile:
-                    json.dump(tweets_out, outfile)
+        if idx % 10000 == 0:        
+            with open('array-loc.json', 'w') as outfile:
+                json.dump(tweets_out, outfile)
+
+with open('array-loc.json', 'w') as outfile:
+    json.dump(tweets_out, outfile)
